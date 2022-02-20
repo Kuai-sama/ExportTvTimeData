@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# ExportTvTimeData
-=======
 # ExportDataTvTime
 
 ## Introduction & why I create this script
@@ -56,4 +53,3 @@ In development progress
 
 ## Question & bugs report
 In development progress
->>>>>>> 29afcd0 (V1.0 updating the readme.md)
