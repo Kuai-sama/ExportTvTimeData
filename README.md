@@ -8,6 +8,7 @@ I have added so many shows to watch that I never know where to start. I usually 
 
 ## Install
 Install the project folder with all files that you need.
+
 ![img](imgMarkdown/DownloadZipFile.png)
 
 You need to install interpreter python, i used the [3.8.7 64-bit version](https://www.python.org/downloads/release/python-387/).
