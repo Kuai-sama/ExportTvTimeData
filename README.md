@@ -13,18 +13,21 @@ Install the project folder with all files that you need.
 
 You need to install interpreter python, i used the [3.8.7 64-bit version](https://www.python.org/downloads/release/python-387/).
 Don't forget to add python to PATH.
+
+  Before Running the script you need to change 2 strings in the python file :
+  ``` 
+    # connection
+    tvtime = TVTimeWrapper(r"YourUserName", r"YourPassword")
+  ```
+  Replace ```YourUserName``` and ```YourPassword``` by your Username and your Password.
+
 * ### Running with Visual Studio Code
     You can run the script with Visual Studio Code with [this documentation](https://code.visualstudio.com/docs/languages/python)
+
     You can now running the script, by pressing the ruuning button
     ![img](imgMarkdown/RunningButton.png)
 
 * ### Running without IDE
-  Before Running the script you need to change 2 strings in the python file :
-   ``` 
-    # connection
-    tvtime = TVTimeWrapper(r"YourUserName", r"YourPassword")
-    ```
-    Replace ```YourUserName``` and ```YourPassword``` by your Username and your Password.
 
   You can execute IDLE and run the script or using cmd :
   * ##### IDLE version 
