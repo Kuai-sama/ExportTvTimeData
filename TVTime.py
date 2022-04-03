@@ -1,3 +1,4 @@
+# coding: utf-8
 from tvtimewrapper import TVTimeWrapper
 import pandas
 import json
@@ -7,15 +8,15 @@ import os
     Author : Kuaï
     Github : Kuai-sama
     Created date project : 18/02/2022
-    Last update : 23/02/2022
+    Last update : 03/04/2022
     Current version : v1.1
     Python interpretor : 3.8.7 64 bit
-
     Goals of the Project : Exporting accurately data from TvTime to cvs file
 """
 
 dir_path = os.path.dirname(os.path.realpath(
     __file__))  # Current directory project
+
 file_name_json = dir_path + os.sep + r"data.json"
 file_name_csv = dir_path + os.sep + r"dataTVTime.csv"
 
@@ -59,18 +60,17 @@ index = data[data['up_to_date'] == True].index
 data.drop(index, inplace=True)
 
 '''
-    By default, when converting json data to csv, it creates a column named "Unnamed: 0", which refers to the iteration number of your show. so wer rename the column to "N°"
+    By default, when converting json data to csv, it creates a column named "Unnamed: 0", which refers to the iteration number of your show. so we have rename the column to "N°"
 '''
 data.rename(columns={"Unnamed: 0": "N°"}, inplace=True)
 data.columns
 
+incremented_value = 0
 # Remove {'poster': {'0':  in all_images column
 for key, value in data.iterrows():
     NewString = '{}'.format(value["all_images"]).lstrip("{'poster': {'0': '")
     data.loc[key, "all_images"] = NewString[:-3]
 # Increment the column "N°"
-    incremented_value = '{}'.format(value["N°"])
-    incremented_value = int(incremented_value)
     incremented_value += 1
     data.loc[key, "N°"] = incremented_value
 
