@@ -1,14 +1,16 @@
 # coding: utf-8
-from tvtimewrapper import TVTimeWrapper
-import pandas
 import json
 import os
+
+import pandas
+import stdiomask
+from tvtimewrapper import TVTimeWrapper
 
 """
     Author : Kuaï
     Github : Kuai-sama
     Created date project : 18/02/2022
-    Last update : 03/04/2022
+    Last update : 25/06/2023
     Current version : v1.1
     Python interpreter : 3.8.7 64 bit
     Goals of the Project : Exporting accurately data from TvTime to cvs file
@@ -19,8 +21,12 @@ dir_path = os.path.dirname(os.path.realpath(__file__))  # Current directory proj
 file_name_json = dir_path + os.sep + r"data.json"
 file_name_csv = dir_path + os.sep + r"dataTVTime.csv"
 
+# User input (username and password)
+user_name = input("Enter your username : ")
+password = stdiomask.getpass(prompt="Enter your password : ", mask="*")
+
 # Connection
-tvtime = TVTimeWrapper(r"YourUserName", r"YourPassword")
+tvtime = TVTimeWrapper(user_name, password)
 print("Connection to TVTimeWrapper module")
 
 # Get all the shows that the user have followed
