@@ -65,13 +65,10 @@ data.drop(index, inplace=True)
 data.rename(columns={"Unnamed: 0": "N°"}, inplace=True)
 data.columns
 
-incremented_value = 0
 # Remove {'poster': {'0':  in all_images column
-for key, value in data.iterrows():
-    NewString = '{}'.format(value["all_images"]).lstrip("{'poster': {'0': '")
+for incremented_value, (key, value) in enumerate(data.iterrows(), start=1):
+    NewString = f'{value["all_images"]}'.lstrip("{'poster': {'0': '")
     data.loc[key, "all_images"] = NewString[:-3]
-# Increment the column "N°"
-    incremented_value += 1
     data.loc[key, "N°"] = incremented_value
 
 print(data)  # display
