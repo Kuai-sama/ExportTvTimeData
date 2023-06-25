@@ -5,6 +5,8 @@ import os
 import pandas
 import stdiomask
 from tvtimewrapper import TVTimeWrapper
+from dotenv import load_dotenv
+from pathlib import Path
 
 """
     Author : Kuaï
@@ -21,9 +23,18 @@ dir_path = os.path.dirname(os.path.realpath(__file__))  # Current directory proj
 file_name_json = dir_path + os.sep + r"data.json"
 file_name_csv = dir_path + os.sep + r"dataTVTime.csv"
 
-# User input (username and password)
-user_name = input("Enter your username : ")
-password = stdiomask.getpass(prompt="Enter your password : ", mask="*")
+# Read the dotenv file
+load_dotenv(Path(dir_path, "env", "tvtime.env"))
+
+# Check if the environment variable is set, user input => enabled
+if not os.getenv("TVTIME_CREDENTIALS"):
+    # User input (username and password)
+    user_name = input("Enter your username : ")
+    password = stdiomask.getpass(prompt="Enter your password : ", mask="*")
+else:
+    # Get the environment variable
+    user_name = os.getenv("TVTIME_CREDENTIALS").split(";")[0]
+    password = os.getenv("TVTIME_CREDENTIALS").split(";")[1]
 
 # Connection
 tvtime = TVTimeWrapper(user_name, password)
