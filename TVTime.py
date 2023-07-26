@@ -1,106 +1,92 @@
-# coding: utf-8
-import json
 import os
-
-import pandas
-import stdiomask
-from tvtimewrapper import TVTimeWrapper
-from dotenv import load_dotenv
+from itertools import product
+from json import dump
 from pathlib import Path
 
-"""
-    Author : Kuaï
-    Github : Kuai-sama
-    Created date project : 18/02/2022
-    Last update : 25/06/2023
-    Current version : v1.1
-    Python interpreter : 3.8.7 64 bit
-    Goals of the Project : Exporting accurately data from TvTime to cvs file
-"""
+import pandas as pd
+from dotenv import load_dotenv
+from stdiomask import getpass
+from tvtimewrapper import TVTimeWrapper
 
-dir_path = os.path.dirname(os.path.realpath(__file__))  # Current directory project
 
-file_name_json = dir_path + os.sep + r"data.json"
-file_name_csv = dir_path + os.sep + r"dataTVTime.csv"
+class ExportTvTimeData:
+    def __init__(self):
+        self.dir_path = os.path.dirname(os.path.realpath(__file__))
+        self.file_name_json = Path(self.dir_path, "data.json")
+        self.file_name_csv = Path(self.dir_path, "dataTVTime.csv")
+        self.tvtime_wrapper = None
+        load_dotenv(Path(self.dir_path, "env", "tvtime.env"))
 
-# Read the dotenv file
-load_dotenv(Path(dir_path, "env", "tvtime.env"))
+    def get_credentials(self) -> tuple:
+        if not os.getenv("TVTIME_CREDENTIALS"):
+            # User input (username and password)
+            user_name = input("Enter your username: ")
+            password = getpass(prompt="Enter your password: ", mask="*")
+        else:
+            # Get the environment variable
+            credentials = os.getenv("TVTIME_CREDENTIALS").split(";")
+            user_name = credentials[0]
+            password = credentials[1]
+        return user_name, password
 
-# Check if the environment variable is set, user input => enabled
-if not os.getenv("TVTIME_CREDENTIALS"):
-    # User input (username and password)
-    user_name = input("Enter your username : ")
-    password = stdiomask.getpass(prompt="Enter your password : ", mask="*")
-else:
-    # Get the environment variable
-    user_name = os.getenv("TVTIME_CREDENTIALS").split(";")[0]
-    password = os.getenv("TVTIME_CREDENTIALS").split(";")[1]
+    def connect_to_tvtime(self, user_name, password):
+        self.tvtime_wrapper = TVTimeWrapper(user_name, password)
+        print("Connection to TVTimeWrapper module")
 
-# Connection
-tvtime = TVTimeWrapper(user_name, password)
-print("Connection to TVTimeWrapper module")
+    def get_list_followed_shows(self) -> list:
+        return self.tvtime_wrapper.show.followed()
 
-# Get all the shows that the user have followed
-ShowFollowed = tvtime.show.followed()
+    def change_columns_order(self, json_data: list):
+        # Change the order of the columns
+        columns = [
+            "id",
+            "name",
+            "last_seen",
+            "last_aired",
+            "next_aired",
+            "up_to_date",
+            "followed",
+            "archived",
+            "favorite",
+            "diffusion",
+            "folder",
+            "status",
+            "notification_type",
+            "is_web_serie",
+            "hashtag",
+            "number_of_seasons",
+            "aired_episodes",
+            "seen_episodes",
+            "runtime",
+            "all_images",
+        ]
+        # new dataframe with the columns in the order that we want
+        df = pd.DataFrame(columns=columns)
 
-list = ["1", "1,3", "1,5", "2", "2,6", "3", "4"]
-# Keep only one image for all shows
-for element in ShowFollowed:
-    del element["all_images"]["banner"]
-    del element["all_images"]["fanart"]
-    for i in list:
-        del element["all_images"]["poster"][i]
+        # Convert dataframe to dictionary
+        data = list(json_data)
+        df = pd.concat([df, pd.DataFrame(data)], ignore_index=True)
 
-print("Get selected data of all the shows that you have followed")
+        return df.to_dict(orient="records")
 
-# Send the modified data in to a real json file
-with open(file_name_json, "w") as my_file:
-    json.dump(ShowFollowed, my_file)
+    def delete_columns(self, json_data: list, columns: list, keep_one_image: bool = False):
+        for item, column in product(json_data, columns):
+            if keep_one_image and column == "all_images":
+                # Keep only the first image (posters), delete the rest
+                del item[column]["banner"]
+                del item[column]["fanart"]
+                item[column]["poster"] = item[column]["poster"]["0"]
+            else:
+                del item[column]
+        return json_data
 
-# Convert json to csv data
-pandas.read_json(file_name_json).to_csv(file_name_csv)
+    def create_json_file(self, json_data: list):
+        with open(self.file_name_json, "w") as my_file:
+            dump(json_data, my_file)
+        print("Created JSON file")
 
-# Read the file
-data = pandas.read_csv(file_name_csv)
-
-# List of all columns to be deleted
-columns_To_Be_Deleted = [
-    "last_seen",
-    "last_aired",
-    "next_aired",
-    "followed",
-    "archived",
-    "diffusion",
-    "folder",
-    "notification_type",
-    "is_web_serie",
-    "hashtag",
-    "number_of_seasons",
-    "favorite",
-]
-
-# Drop useless columns from the CSV data
-for column in columns_To_Be_Deleted:
-    data.pop(column)
-
-# Remove shows already seen
-index = data[data["up_to_date"] == True].index
-data.drop(index, inplace=True)
-
-"""
-    By default, when converting json data to csv, it creates a column named "Unnamed: 0", which refers to the iteration number of your show. so we have rename the column to "N°"
-"""
-data.rename(columns={"Unnamed: 0": "N°"}, inplace=True)
-data.columns
-
-# Remove {'poster': {'0':  in all_images column
-for incremented_value, (key, value) in enumerate(data.iterrows(), start=1):
-    NewString = f'{value["all_images"]}'.lstrip("{'poster': {'0': '")
-    data.loc[key, "all_images"] = NewString[:-3]
-    data.loc[key, "N°"] = incremented_value
-
-print(data)  # display
-
-# Saving file
-data.to_csv(file_name_csv, index=None)
-print("Saved file")
+    def create_csv_file(self, json_data: list):
+        df = pd.json_normalize(json_data)
+        df.index = df.index + 1
+        df.to_csv(self.file_name_csv, index=True, index_label="N°")
+        print("Created CSV file")
