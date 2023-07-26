@@ -1,4 +1,4 @@
-from TVTime import ExportTvTimeData
+from tv_time import ExportTvTimeData
 
 
 if __name__ == "__main__":
