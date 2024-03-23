@@ -8,7 +8,7 @@ I have added so many shows to watch that I never know where to start. I usually 
 ## Setting up
 * dotenv
   
-  Create a file named 'tvtime.env' in the 'env' folder and write the following inside: 
+  Create a file named 'tvtime.env' in the 'conf/env' folder and write the following inside: 
   ```
     TVTIME_CREDENTIALS = "user;passwd"
   ```
