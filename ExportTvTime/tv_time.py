@@ -1,9 +1,7 @@
 from itertools import product
 from json import dump
-from os import getenv
 
 import pandas as pd
-from stdiomask import getpass
 from tvtimewrapper import TVTimeWrapper
 
 from conf import settings
