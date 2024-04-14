@@ -1,7 +1,10 @@
+from enum import Enum
 from os import getenv
 from pathlib import Path
 OUTPUT_FOLDER = Path(__file__).parent.parent.joinpath("output")
 
+class EnvVar(Enum):
+    TVTIME_CREDENTIALS = "TVTIME_CREDENTIALS"
 
 class EnvManager:
     class ExceptionEnvVarNotFound(Exception):

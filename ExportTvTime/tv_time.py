@@ -8,9 +8,11 @@ from tvtimewrapper import TVTimeWrapper
 
 from conf import settings
 
+from .generic import Generic
 
-class ExportTvTimeData:
-    """Class for exporting data from the TVTime website.
+
+class ExportTvTimeData(Generic):
+    """Class for exporting data from the TVTime website inherited from the Generic class.
 
     This class connects to the TVTimeWrapper module, retrieves data on followed TV shows,
     and exports it to a JSON file and a CSV file. It also provides methods to change the order
@@ -22,7 +24,6 @@ class ExportTvTimeData:
         tvtime_wrapper (TVTimeWrapper): An instance of the TVTimeWrapper class used to connect to TVTime.
         
     Methods:
-        _get_credentials: Retrieves TVTime credentials.
         connect_to_tvtime: Connects to the TVTime website.
         get_list_followed_shows: Retrieves a list of followed TV shows from TVTime.
         change_columns_order: Changes the order of the columns in the data.
@@ -30,13 +31,15 @@ class ExportTvTimeData:
         create_json_file: Creates a JSON file with the provided data.
         create_csv_file: Creates a CSV file with the provided data."""
 
-    def __init__(self):
-        self.file_name_json = settings.OUTPUT_FOLDER.joinpath("data.json")
-        self.file_name_csv = settings.OUTPUT_FOLDER.joinpath("dataTVTime.csv")
+    def __init__(self, username: str, passwd: str):
+        Generic.__init__(self, username, passwd)
+        self.file_path_json = settings.OUTPUT_FOLDER.joinpath("data.json")
+        self.file_path_csv = settings.OUTPUT_FOLDER.joinpath("dataTVTime.csv")
         self.tvtime_wrapper = None
+
         
     def __enter__(self):
-        self.connect_to_tvtime()
+        self.connect_to_tvtime(self._username, self._passwd)
         return self
     
     def __exit__(self, exc_type, exc_value, traceback):
@@ -44,25 +47,13 @@ class ExportTvTimeData:
             print(f"Exception: {exc_type} - {exc_value}")
         return True
 
-    def _get_credentials(self) -> tuple:
-        """Retrieves TVTime credentials.
 
-        Returns:
-            tuple: A tuple containing the username and password."""
-
-        if not getenv("TVTIME_CREDENTIALS"):
-            # User input (username and password)
-            user_name = input("Enter your username: ")
-            password = getpass(prompt="Enter your password: ", mask="*")
-        else:
-            # Get the environment variable
-            user_name, password = getenv("TVTIME_CREDENTIALS").split(";")
-        return user_name, password
-
-    def connect_to_tvtime(self):
-        """Connects to the TVTime website."""
+    def connect_to_tvtime(self, user_name: str, password: str):
+        """Connects to the TVTime website.
         
-        user_name, password = self._get_credentials()
+        Args:
+            user_name (str): The username of the user.
+            password (str): The password of the user."""
 
         self.tvtime_wrapper = TVTimeWrapper(user_name, password)
         print("Connection to TVTimeWrapper module")
@@ -144,7 +135,7 @@ class ExportTvTimeData:
         Args:
             json_data (list): The data to be exported."""
 
-        with open(self.file_name_json, "w", encoding="utf_8") as my_file:
+        with open(self.file_path_json, "w", encoding="utf-8") as my_file:
             dump(json_data, my_file)
 
         print("Created JSON file")
@@ -157,5 +148,5 @@ class ExportTvTimeData:
 
         df = pd.json_normalize(json_data)
         df.index = df.index + 1
-        df.to_csv(self.file_name_csv, index=True, index_label="N°")
+        df.to_csv(self.file_path_csv, index=True, index_label="N°")
         print("Created CSV file")
