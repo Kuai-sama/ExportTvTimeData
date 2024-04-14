@@ -6,10 +6,8 @@ def main():
     username, passwd = Generic().get_credentials
     with ExportTvTimeData(username=username, passwd=passwd) as my_tvtime:
         shows = my_tvtime.get_list_followed_shows()
-        print(type(shows))
 
         sorted_shows = my_tvtime.change_columns_order(shows)
-        print(type(sorted_shows))
 
         keep_columns = my_tvtime.delete_columns(
             sorted_shows,
