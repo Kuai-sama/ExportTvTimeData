@@ -1,8 +1,10 @@
+from ExportTvTime.generic import Generic
 from ExportTvTime.tv_time import ExportTvTimeData
 
 
 def main():
-    with ExportTvTimeData() as my_tvtime:
+    username, passwd = Generic().get_credentials
+    with ExportTvTimeData(username=username, passwd=passwd) as my_tvtime:
         shows = my_tvtime.get_list_followed_shows()
         print(type(shows))
 
